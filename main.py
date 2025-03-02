@@ -21,7 +21,7 @@ mysql = MySQL(app)
 @app.route("/hello")
 @app.route("/")
 def home():
-    token = request.cookies.get('auth_token')
+    token = request.headers.get('Authorization')
     if token:
         token_encoded = token.encode()
         userid_encoded = token_gen.decrypt(token_encoded)
@@ -36,7 +36,7 @@ def home():
 
 @app.route("/add-todo", methods=['POST'])
 def add_todo():
-    token = request.cookies.get('auth_token')
+    token = request.headers.get('Authorization')
     if token:
         token_encoded = token.encode()
         userid_encoded = token_gen.decrypt(token_encoded)
@@ -84,7 +84,6 @@ def login():
         password_matched = bcrypt.checkpw(password_encoded, password_fetched_encoded)
 
         if password_matched:
-            res = make_response()
 
             userid = str(data[0])
             userid_encoded = userid.encode()
@@ -92,9 +91,8 @@ def login():
             token = token_gen.encrypt(userid_encoded)
             token_plain = token.decode()
 
-            res.set_cookie("auth_token", token_plain)
 
-            return res
+            return token_plain
         else:
             return 'Invalid credentials!'
     else:
